@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pathology Evidence Timeline - Unified Multidisciplinary Case Review</title>
+    
+    <!-- Meta description for web best practices -->
+    <meta name="description" content="Unified multidisciplinary laboratory evidence timeline dashboard for pathology case reviews.">
+    
+    <!-- Google Fonts for modern medical design typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main CSS stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- 1. TOP HEADER & MAIN CONTROLS             -->
+    <!-- ========================================== -->
+    <header class="app-header">
+        <div class="header-brand">
+            <!-- Medical Icon + App Title & Subtitle -->
+            <div class="brand-icon" aria-hidden="true">🔬</div>
+            <div class="brand-titles">
+                <h1 class="app-title">Pathology Evidence Timeline</h1>
+                <p class="app-subtitle">Unified Multidisciplinary Case Review</p>
+            </div>
+        </div>
+
+        <div class="header-controls">
+            <!-- Search Input for finding cases -->
+            <div class="search-group">
+                <label for="caseSearch" class="sr-only">Search Case</label>
+                <div class="search-input-wrapper">
+                    <span class="search-icon" aria-hidden="true">🔍</span>
+                    <input 
+                        type="text" 
+                        id="caseSearch" 
+                        class="search-input" 
+                        placeholder="Search by Case ID or diagnosis..."
+                        aria-label="Search cases by ID or diagnosis"
+                    >
+                </div>
+            </div>
+
+            <!-- Role Selector Dropdown -->
+            <div class="role-group">
+                <label for="userRole" class="role-label">User Role:</label>
+                <select id="userRole" class="role-select" aria-label="Select User Role">
+                    <option value="Doctor">Doctor</option>
+                    <option value="Pathologist" selected>Pathologist</option>
+                    <option value="Radiologist">Radiologist</option>
+                    <option value="Molecular Specialist">Molecular Specialist</option>
+                    <option value="Lab Admin">Lab Admin</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- 2. MAIN LAYOUT: NAVIGATION + CONTENT       -->
+    <!-- ========================================== -->
+    <div class="app-layout">
+        
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" aria-label="Main Navigation">
+            <ul class="nav-list">
+                <li class="nav-item active" id="navDashboardItem">
+                    <a href="#dashboard" class="nav-link" id="navDashboardLink">
+                        <span class="nav-icon" aria-hidden="true">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="navCasesItem">
+                    <a href="#cases" class="nav-link" id="navCasesLink">
+                        <span class="nav-icon" aria-hidden="true">📁</span>
+                        <span class="nav-text">Cases</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="navTimelineItem">
+                    <a href="#timeline" class="nav-link" id="navTimelineLink">
+                        <span class="nav-icon" aria-hidden="true">⏱️</span>
+                        <span class="nav-text">Timeline</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="navSchedulingItem">
+                    <a href="#scheduling" class="nav-link" id="navSchedulingLink">
+                        <span class="nav-icon" aria-hidden="true">📅</span>
+                        <span class="nav-text">Scheduling</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="navReportsItem">
+                    <a href="#reports" class="nav-link" id="navReportsLink">
+                        <span class="nav-icon" aria-hidden="true">📑</span>
+                        <span class="nav-text">Reports</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <div class="user-role-badge">
+                    <span class="role-badge-icon" aria-hidden="true">👤</span>
+                    <div>
+                        <small>Active Perspective</small>
+                        <strong id="activeRoleDisplay">Pathologist</strong>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Workspace Area -->
+        <main class="main-content">
+            
+            <!-- CURRENT VIEW ROLE BANNER -->
+            <div id="roleViewBanner" class="role-view-banner">
+                <span class="banner-role-icon" id="roleBannerIcon" aria-hidden="true">🔬</span>
+                <span class="banner-role-text">Current View: <strong id="roleBannerTitle">Pathologist</strong></span>
+            </div>
+
+            <!-- LABORATORY CAPACITY WIDGET (LAB ADMIN VIEW ONLY) -->
+            <section id="labCapacitySection" class="lab-capacity-section hidden" aria-label="Laboratory Capacity and Operational Workload">
+                <div class="capacity-header">
+                    <div class="capacity-title">
+                        <span class="capacity-icon" aria-hidden="true">📋</span>
+                        <h3>Laboratory Capacity & Operational Workload</h3>
+                    </div>
+                    <span class="badge badge-status-completed">🟢 Capacity Available</span>
+                </div>
+                <div class="capacity-grid">
+                    <div class="capacity-card">
+                        <span class="capacity-label">Daily Capacity</span>
+                        <strong class="capacity-value">20 cases</strong>
+                        <small class="capacity-sub">Maximum throughput</small>
+                    </div>
+                    <div class="capacity-card">
+                        <span class="capacity-label">Current Scheduled</span>
+                        <strong class="capacity-value" id="adminWidgetScheduledVal">15 cases</strong>
+                        <small class="capacity-sub">Active processing</small>
+                    </div>
+                    <div class="capacity-card">
+                        <span class="capacity-label">Available Capacity</span>
+                        <strong class="capacity-value text-success" id="adminWidgetAvailableVal">5 cases</strong>
+                        <small class="capacity-sub">Slots remaining</small>
+                    </div>
+                    <div class="capacity-card">
+                        <span class="capacity-label">Pending Molecular</span>
+                        <strong class="capacity-value text-warning">3 cases</strong>
+                        <small class="capacity-sub">Awaiting NGS panel</small>
+                    </div>
+                    <div class="capacity-card">
+                        <span class="capacity-label">Missing Evidence</span>
+                        <strong class="capacity-value text-danger">2 cases</strong>
+                        <small class="capacity-sub">Incomplete records</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ======================================================== -->
+            <!-- VIEW A: MAIN DASHBOARD VIEW                               -->
+            <!-- ======================================================== -->
+            <div id="dashboardView" class="view-container">
+                
+                <!-- Dashboard Welcome Banner -->
+                <section class="welcome-banner">
+                    <div class="banner-text">
+                        <h2>Multidisciplinary Laboratory Dashboard</h2>
+                        <p>Select a case to review clinical data, biopsy reports, imaging, and molecular analysis.</p>
+                    </div>
+                </section>
+
+                <!-- Dashboard Summary Cards (4 Cards) -->
+                <section class="dashboard-cards" aria-label="Case Summaries">
+                    <!-- Card 1: Total Cases -->
+                    <div class="card card-total">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">📑</span>
+                            <span class="card-label">Total Cases</span>
+                        </div>
+                        <div class="card-body">
+                            <span class="card-value">12</span>
+                            <span class="card-subtext">Active in registry</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Urgent Cases -->
+                    <div class="card card-urgent">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">🚨</span>
+                            <span class="card-label">Urgent Cases</span>
+                        </div>
+                        <div class="card-body">
+                            <span class="card-value">3</span>
+                            <span class="card-subtext">High priority review required</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Pending / Missing Evidence -->
+                    <div class="card card-pending">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">⏳</span>
+                            <span class="card-label">Pending / Missing Evidence</span>
+                        </div>
+                        <div class="card-body">
+                            <span class="card-value">5</span>
+                            <span class="card-subtext">Awaiting lab, imaging or molecular data</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Cases Ready for Review -->
+                    <div class="card card-ready">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">✅</span>
+                            <span class="card-label">Cases Ready for Review</span>
+                        </div>
+                        <div class="card-body">
+                            <span class="card-value">7</span>
+                            <span class="card-subtext">Ready for multidisciplinary team</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Recent Cases Section -->
+                <section class="cases-section" id="casesTableSection">
+                    <div class="section-header">
+                        <h2>Recent Cases</h2>
+                        <span class="case-count-tag" id="caseCountTag">Showing 4 sample cases</span>
+                    </div>
+
+                    <!-- Responsive Case Table -->
+                    <div class="table-container">
+                        <table class="cases-table">
+                            <thead>
+                                <tr>
+                                    <th>Case ID</th>
+                                    <th>Case Description</th>
+                                    <th>Priority</th>
+                                    <th>Review Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="caseTableBody">
+                                
+                                <!-- Case 001 -->
+                                <tr class="case-row" data-case-id="Case 001">
+                                    <td class="cell-case-id"><strong>Case 001</strong></td>
+                                    <td class="cell-description">
+                                        <span class="case-title">Suspected Lung Cancer</span>
+                                        <small class="case-meta">De-identified Patient ID: P-9082 | Specimen: Needle Biopsy</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-priority-urgent">
+                                            <span class="badge-icon" aria-hidden="true">⚠️</span>
+                                            <span class="badge-text">Urgent</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-status-pending">
+                                            <span class="badge-icon" aria-hidden="true">⏳</span>
+                                            <span class="badge-text">Pending Results</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button 
+                                            type="button" 
+                                            class="btn btn-primary btn-view-case" 
+                                            data-case-id="Case 001"
+                                            aria-label="View Case 001 details and timeline"
+                                        >
+                                            <span aria-hidden="true">👁️</span> View Case
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Case 002 -->
+                                <tr class="case-row" data-case-id="Case 002">
+                                    <td class="cell-case-id"><strong>Case 002</strong></td>
+                                    <td class="cell-description">
+                                        <span class="case-title">Breast Tumor</span>
+                                        <small class="case-meta">De-identified Patient ID: P-7641 | Specimen: Core Biopsy</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-priority-normal">
+                                            <span class="badge-icon" aria-hidden="true">🟢</span>
+                                            <span class="badge-text">Normal</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-status-ready">
+                                            <span class="badge-icon" aria-hidden="true">✅</span>
+                                            <span class="badge-text">Ready for Review</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button 
+                                            type="button" 
+                                            class="btn btn-primary btn-view-case" 
+                                            data-case-id="Case 002"
+                                            aria-label="View Case 002 details and timeline"
+                                        >
+                                            <span aria-hidden="true">👁️</span> View Case
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Case 003 -->
+                                <tr class="case-row" data-case-id="Case 003">
+                                    <td class="cell-case-id"><strong>Case 003</strong></td>
+                                    <td class="cell-description">
+                                        <span class="case-title">Liver Lesion</span>
+                                        <small class="case-meta">De-identified Patient ID: P-3310 | Specimen: Ultrasound-Guided Fine Needle</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-priority-urgent">
+                                            <span class="badge-icon" aria-hidden="true">⚠️</span>
+                                            <span class="badge-text">Urgent</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-status-ready">
+                                            <span class="badge-icon" aria-hidden="true">✅</span>
+                                            <span class="badge-text">Ready for Review</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button 
+                                            type="button" 
+                                            class="btn btn-primary btn-view-case" 
+                                            data-case-id="Case 003"
+                                            aria-label="View Case 003 details and timeline"
+                                        >
+                                            <span aria-hidden="true">👁️</span> View Case
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Case 004 -->
+                                <tr class="case-row" data-case-id="Case 004">
+                                    <td class="cell-case-id"><strong>Case 004</strong></td>
+                                    <td class="cell-description">
+                                        <span class="case-title">Brain Tumor</span>
+                                        <small class="case-meta">De-identified Patient ID: P-5529 | Specimen: Resection Tissue</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-priority-normal">
+                                            <span class="badge-icon" aria-hidden="true">🟢</span>
+                                            <span class="badge-text">Normal</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-status-pending">
+                                            <span class="badge-icon" aria-hidden="true">⏳</span>
+                                            <span class="badge-text">Pending Results</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button 
+                                            type="button" 
+                                            class="btn btn-primary btn-view-case" 
+                                            data-case-id="Case 004"
+                                            aria-label="View Case 004 details and timeline"
+                                        >
+                                            <span aria-hidden="true">👁️</span> View Case
+                                        </button>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- No Search Results Found message -->
+                    <div id="noResults" class="no-results hidden">
+                        <p>🔍 No matching cases found for your search term.</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- VIEW B: CASE DETAILS & EVIDENCE TIMELINE VIEW             -->
+            <!-- ======================================================== -->
+            <div id="caseDetailsView" class="view-container hidden">
+                
+                <!-- Back Navigation Button -->
+                <div class="view-navigation-bar">
+                    <button type="button" id="backToDashboardBtn" class="btn btn-secondary btn-back">
+                        <span aria-hidden="true">←</span> Back to Dashboard
+                    </button>
+                </div>
+
+                <!-- Case Header Card -->
+                <section class="case-header-card" aria-label="Selected Case Overview">
+                    <div class="case-header-main">
+                        <div>
+                            <span class="case-id-badge" id="detailCaseId">CASE 001</span>
+                            <h2 class="case-detail-title" id="detailCaseTitle">Suspected Lung Cancer</h2>
+                        </div>
+                        <div class="case-header-badges">
+                            <span id="detailCasePriority" class="badge badge-priority-urgent">⚠️ Urgent</span>
+                            <span id="detailCaseStatus" class="badge badge-status-pending">⏳ Pending Results</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- EVIDENCE ALERTS & SAFETY SECTION -->
+                <section class="evidence-alerts-section" aria-label="Evidence Alerts and Warnings">
+                    <div class="alerts-header">
+                        <h3>Evidence Alerts & Freshness Audit</h3>
+                    </div>
+                    
+                    <div id="evidenceAlertsContainer" class="alerts-container">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <!-- Safety Review Required Notice -->
+                    <div id="safetyNoticeBox" class="safety-notice-box hidden">
+                        <div class="safety-notice-header">
+                            <span class="safety-icon" aria-hidden="true">🛡️</span>
+                            <strong>Manual Expert Review Required</strong>
+                        </div>
+                        <p class="safety-notice-text">
+                            Important evidence for this case is missing, aging, or stale. Automated clinical decision-making is disabled. A multidisciplinary expert team must manually verify all unconfirmed results before formulating a final diagnosis or treatment plan.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- MDT REVIEW & DECISION TRACKING SECTION (NEW PHASE 7) -->
+                <section class="mdt-review-section" aria-label="Multidisciplinary Team Review and Decision Tracking">
+                    <div class="section-title-group">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                            <div>
+                                <h3>MDT Review & Decision Tracking</h3>
+                                <p>Multidisciplinary team case consensus, reviewer logs, and decision tracking</p>
+                            </div>
+                            <span id="mdtReviewStatusBadge" class="badge badge-status-scheduled">📅 Scheduled</span>
+                        </div>
+                    </div>
+
+                    <div class="mdt-review-card">
+                        <div class="mdt-details-grid">
+                            <div class="mdt-detail-item">
+                                <span class="mdt-label">Case ID:</span>
+                                <strong id="mdtCaseIdVal" class="mdt-value">CASE-001</strong>
+                            </div>
+                            <div class="mdt-detail-item">
+                                <span class="mdt-label">Case Name:</span>
+                                <span id="mdtCaseNameVal" class="mdt-value">Suspected Lung Cancer</span>
+                            </div>
+                            <div class="mdt-detail-item">
+                                <span class="mdt-label">Review Date:</span>
+                                <span id="mdtReviewDateVal" class="mdt-value">Today / 04:00 PM</span>
+                            </div>
+                            <div class="mdt-detail-item">
+                                <span class="mdt-label">Review Team:</span>
+                                <div class="mdt-team-badges">
+                                    <span class="team-badge">👨‍⚕️ Doctor</span>
+                                    <span class="team-badge">🧪 Pathologist</span>
+                                    <span class="team-badge">🩻 Radiologist</span>
+                                    <span class="team-badge">🧬 Molecular Specialist</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Bar to Open Decision Form -->
+                        <div class="mdt-action-bar" id="mdtActionBar">
+                            <button type="button" class="btn btn-primary" id="btnRecordMdtDecision">
+                                <span aria-hidden="true">📝</span> Record MDT Decision
+                            </button>
+                        </div>
+
+                        <!-- Restricted Role Notice for Lab Admin -->
+                        <div id="mdtLabAdminNotice" class="modal-notice hidden" style="margin-top:0.75rem;">
+                            <p>📋 <em>Lab Admin perspective is restricted to operational review. Clinical decision recording requires clinical role selection (Doctor, Pathologist, Radiologist, Molecular Specialist).</em></p>
+                        </div>
+
+                        <!-- Record Decision Form Card (Hidden by default) -->
+                        <div id="mdtDecisionFormCard" class="mdt-form-card hidden">
+                            <div class="mdt-form-header">
+                                <h4>Record Multidisciplinary Decision</h4>
+                            </div>
+
+                            <form id="mdtForm" onsubmit="return false;">
+                                <div class="form-group">
+                                    <label for="selectMdtDecision" class="form-label">Review Decision:</label>
+                                    <select id="selectMdtDecision" class="form-control" required>
+                                        <option value="Proceed with Further Testing">Proceed with Further Testing</option>
+                                        <option value="Request Additional Evidence" selected>Request Additional Evidence</option>
+                                        <option value="Case Ready for Clinical Review">Case Ready for Clinical Review</option>
+                                        <option value="Manual Expert Review Required">Manual Expert Review Required</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="selectMdtReviewerRole" class="form-label">Reviewer Role:</label>
+                                    <select id="selectMdtReviewerRole" class="form-control" required>
+                                        <option value="Doctor">Doctor</option>
+                                        <option value="Pathologist" selected>Pathologist</option>
+                                        <option value="Radiologist">Radiologist</option>
+                                        <option value="Molecular Specialist">Molecular Specialist</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="txtMdtComments" class="form-label">Clinical Comments / Findings Justification:</label>
+                                    <textarea id="txtMdtComments" class="form-control text-area" rows="3" placeholder="Provide notes regarding evidence requirements or consensus decisions..."></textarea>
+                                </div>
+
+                                <!-- Error Alert Box for Safe Fallback -->
+                                <div id="mdtFormSafetyAlert" class="alert-box alert-stale hidden" style="margin-bottom:1rem;">
+                                    <span>⚠ Unable to record MDT decision. Manual Expert Review Required.</span>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-primary" id="btnSaveMdtDecision">
+                                        <span aria-hidden="true">💾</span> Save Decision
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="btnCancelMdtDecision">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Review History Container -->
+                    <div class="mdt-history-section">
+                        <h4>Review History</h4>
+                        <div id="mdtHistoryContainer">
+                            <ul id="mdtHistoryList" class="mdt-history-list">
+                                <!-- Populated dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Evidence Summary Cards Section (3 Cards: Pathology, Imaging, Molecular) -->
+                <section class="evidence-summary-section">
+                    <div class="section-title-group">
+                        <h3 id="evidenceSummaryHeading">Evidence Summary</h3>
+                        <p id="evidenceSummarySubtext">Multidisciplinary diagnostic evidence breakdown</p>
+                    </div>
+
+                    <!-- Main Grid of 3 Cards -->
+                    <div class="evidence-cards-grid" id="evidenceCardsGrid">
+                        
+                        <!-- Card 1: Pathology -->
+                        <div class="evidence-card card-pathology" id="cardPathology">
+                            <div class="evidence-card-header">
+                                <div class="card-header-left">
+                                    <span class="evidence-icon" aria-hidden="true">🧪</span>
+                                    <h4>Pathology</h4>
+                                </div>
+                                <div id="pathologyFreshnessBadge"></div>
+                            </div>
+                            <div class="evidence-card-body">
+                                <div class="evidence-test-name" id="pathologyTestName">Biopsy</div>
+                                <div class="evidence-status-wrapper" id="pathologyStatusBadge">
+                                    <span class="badge badge-status-ready">Completed</span>
+                                </div>
+                                <div class="evidence-summary-box">
+                                    <span class="summary-label">Summary:</span>
+                                    <p id="pathologySummaryText">Abnormal tissue detected</p>
+                                </div>
+                                <button type="button" class="btn btn-secondary btn-view-details" data-domain="pathology">
+                                    <span aria-hidden="true">📋</span> View Details
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Imaging -->
+                        <div class="evidence-card card-imaging" id="cardImaging">
+                            <div class="evidence-card-header">
+                                <div class="card-header-left">
+                                    <span class="evidence-icon" aria-hidden="true">🩻</span>
+                                    <h4>Imaging</h4>
+                                </div>
+                                <div id="imagingFreshnessBadge"></div>
+                            </div>
+                            <div class="evidence-card-body">
+                                <div class="evidence-test-name" id="imagingTestName">CT Scan</div>
+                                <div class="evidence-status-wrapper" id="imagingStatusBadge">
+                                    <span class="badge badge-status-ready">Completed</span>
+                                </div>
+                                <div class="evidence-summary-box">
+                                    <span class="summary-label">Summary:</span>
+                                    <p id="imagingSummaryText">Lung lesion identified</p>
+                                </div>
+                                <button type="button" class="btn btn-secondary btn-view-details" data-domain="imaging">
+                                    <span aria-hidden="true">📋</span> View Details
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Molecular -->
+                        <div class="evidence-card card-molecular" id="cardMolecular">
+                            <div class="evidence-card-header">
+                                <div class="card-header-left">
+                                    <span class="evidence-icon" aria-hidden="true">🧬</span>
+                                    <h4>Molecular</h4>
+                                </div>
+                                <div id="molecularFreshnessBadge"></div>
+                            </div>
+                            <div class="evidence-card-body">
+                                <div class="evidence-test-name" id="molecularTestName">Gene Panel</div>
+                                <div class="evidence-status-wrapper" id="molecularStatusBadge">
+                                    <span class="badge badge-status-pending">Pending</span>
+                                </div>
+                                <div class="evidence-summary-box">
+                                    <span class="summary-label">Summary:</span>
+                                    <p id="molecularSummaryText">Result not available</p>
+                                </div>
+                                <button type="button" class="btn btn-secondary btn-view-details" data-domain="molecular">
+                                    <span aria-hidden="true">📋</span> View Details
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- OTHER EVIDENCE SECTION -->
+                <section id="otherEvidenceSection" class="other-evidence-section hidden" aria-label="Other Secondary Evidence Summary">
+                    <div class="section-title-group">
+                        <h3>Other Evidence</h3>
+                        <p>Summary of secondary multidisciplinary diagnostic findings</p>
+                    </div>
+                    <div id="otherEvidenceContainer" class="other-evidence-container">
+                        <!-- Populated dynamically by script.js -->
+                    </div>
+                </section>
+
+                <!-- SPECIMEN LINEAGE SECTION -->
+                <section class="specimen-lineage-section" aria-label="Specimen Lineage and Processing History">
+                    <div class="section-title-group">
+                        <h3>Specimen Lineage</h3>
+                        <p>Visual specimen derivation and processing history from original sample to molecular testing</p>
+                    </div>
+
+                    <div id="lineageContainer" class="lineage-flow-container">
+                        <!-- Specimen lineage nodes rendered dynamically by script.js -->
+                    </div>
+                </section>
+
+                <!-- Vertical Evidence Timeline Section -->
+                <section class="timeline-section">
+                    <div class="section-title-group">
+                        <h3>Multidisciplinary Evidence Timeline</h3>
+                        <p>Chronological step-by-step clinical progression</p>
+                    </div>
+
+                    <!-- Vertical Timeline Container -->
+                    <div class="vertical-timeline" id="timelineContainer">
+                        <!-- Timeline nodes rendered dynamically by script.js -->
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- VIEW C: LABORATORY SCHEDULING VIEW                        -->
+            <!-- ======================================================== -->
+            <div id="schedulingView" class="view-container hidden">
+                
+                <section class="scheduling-header-banner">
+                    <div>
+                        <h2>Laboratory Resource Scheduling & Capacity Management</h2>
+                        <p>Manage test processing queues, priority allocations, and laboratory slot throughput.</p>
+                    </div>
+                </section>
+
+                <!-- Capacity Dashboard Cards -->
+                <section class="dashboard-cards" aria-label="Laboratory Capacity Cards">
+                    <div class="card card-total">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">🏭</span>
+                            <span class="card-label">Daily Capacity</span>
+                        </div>
+                        <div class="card-body">
+                            <span class="card-value">20 cases</span>
+                            <span class="card-subtext">Maximum processing throughput</span>
+                        </div>
+                    </div>
+
+                    <div class="card card-pending">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">📅</span>
+                            <span class="card-label">Scheduled</span>
+                        </div>
+                        <div class="card-body">
+                            <span class="card-value" id="schedCardScheduledVal">15 cases</span>
+                            <span class="card-subtext">Active queued tests</span>
+                        </div>
+                    </div>
+
+                    <div class="card card-ready">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">⏳</span>
+                            <span class="card-label">Available Slots</span>
+                        </div>
+                        <div class="card-body">
+                            <span class="card-value" id="schedCardAvailableVal">5</span>
+                            <span class="card-subtext">Remaining slots today</span>
+                        </div>
+                    </div>
+
+                    <div class="card card-urgent">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">🚨</span>
+                            <span class="card-label">Urgent Cases</span>
+                        </div>
+                        <div class="card-body">
+                            <span class="card-value" id="schedCardUrgentVal">3</span>
+                            <span class="card-subtext">High priority pending cases</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Capacity Status Banner -->
+                <section class="capacity-status-container" id="capacityStatusContainer">
+                    <div class="capacity-status-banner banner-available" id="capacityStatusBanner">
+                        <div class="status-banner-title">
+                            <span class="status-icon" id="capacityStatusIcon" aria-hidden="true">🟢</span>
+                            <strong id="capacityStatusTitleText">Capacity Available</strong>
+                        </div>
+                        <p class="status-banner-sub" id="capacityStatusSubText">15 / 20 cases scheduled — 5 slots remaining</p>
+                    </div>
+                </section>
+
+                <!-- Toast Notification -->
+                <div id="schedulingNotificationBox" class="scheduling-toast hidden">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Scheduling Safety Banner -->
+                <div id="schedulingSafetyNotice" class="safety-notice-box hidden">
+                    <div class="safety-notice-header">
+                        <span class="safety-icon" aria-hidden="true">🛡️</span>
+                        <strong>Manual Scheduling Review Required</strong>
+                    </div>
+                    <p class="safety-notice-text">
+                        Laboratory processing capacity has reached maximum daily throughput limit (20/20 cases). Immediate automated slot allocation is disabled. 
+                        <strong>Suggested Action:</strong> Schedule for the next available slot or request manual prioritization from the laboratory administrator.
+                    </p>
+                </div>
+
+                <!-- Urgent Cases Section -->
+                <section class="urgent-scheduling-section">
+                    <div class="section-header">
+                        <div class="urgent-title-group">
+                            <span class="urgent-icon" aria-hidden="true">🚨</span>
+                            <h3>Urgent Cases Requiring Attention</h3>
+                        </div>
+                        <span class="badge badge-priority-urgent">🔴 High Priority Queue</span>
+                    </div>
+                    
+                    <div class="urgent-cases-list" id="urgentCasesList">
+                        <div class="urgent-case-card" id="urgentCardCase003">
+                            <div class="urgent-card-main">
+                                <div class="urgent-case-titles">
+                                    <span class="case-id-badge">CASE-003</span>
+                                    <h4>Liver Lesion — Molecular Test</h4>
+                                    <small class="case-meta">Patient ID: P-3310 | Requested: Targeted NGS Molecular Panel</small>
+                                </div>
+                                <div class="urgent-card-tags">
+                                    <span class="badge badge-priority-urgent">🔴 URGENT</span>
+                                    <span class="badge badge-status-pending" id="urgentStatusTagCase003">Waiting for scheduling</span>
+                                </div>
+                            </div>
+                            <div class="urgent-card-action">
+                                <button type="button" class="btn btn-primary btn-schedule-urgent" id="btnScheduleUrgentCase003">
+                                    <span aria-hidden="true">📅</span> Schedule Urgent Test
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Scheduled & Pending Cases Table -->
+                <section class="cases-section">
+                    <div class="section-header">
+                        <h3>Scheduled Cases Registry</h3>
+                        <span class="case-count-tag" id="scheduledTableCountTag">4 Scheduled & Pending Slots</span>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="cases-table">
+                            <thead>
+                                <tr>
+                                    <th>Case ID</th>
+                                    <th>Test Description</th>
+                                    <th>Priority</th>
+                                    <th>Scheduled Time</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>CASE-001</strong></td>
+                                    <td>
+                                        <span class="case-title">Molecular Test (Gene Panel)</span>
+                                        <small class="case-meta">Suspected Lung Cancer</small>
+                                    </td>
+                                    <td><span class="badge badge-priority-urgent">🔴 URGENT</span></td>
+                                    <td><span class="timeline-time">10:00 AM</span></td>
+                                    <td><span class="badge badge-status-scheduled">📅 Scheduled</span></td>
+                                    <td><button type="button" class="btn btn-secondary" disabled>Slot Confirmed</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CASE-002</strong></td>
+                                    <td>
+                                        <span class="case-title">Imaging Review (Mammogram)</span>
+                                        <small class="case-meta">Breast Tumor</small>
+                                    </td>
+                                    <td><span class="badge badge-priority-normal">🟢 Normal</span></td>
+                                    <td><span class="timeline-time">11:00 AM</span></td>
+                                    <td><span class="badge badge-status-scheduled">📅 Scheduled</span></td>
+                                    <td><button type="button" class="btn btn-secondary" disabled>Slot Confirmed</button></td>
+                                </tr>
+                                <tr id="rowCase003">
+                                    <td><strong>CASE-003</strong></td>
+                                    <td>
+                                        <span class="case-title">Molecular Test (Molecular Panel)</span>
+                                        <small class="case-meta">Liver Lesion</small>
+                                    </td>
+                                    <td><span class="badge badge-priority-urgent">🔴 URGENT</span></td>
+                                    <td><span class="timeline-time">12:00 PM</span></td>
+                                    <td id="statusCellCase003"><span class="badge badge-status-pending">⏳ Pending</span></td>
+                                    <td id="actionCellCase003">
+                                        <button type="button" class="btn btn-primary btn-schedule-action" id="btnScheduleCase003">
+                                            <span aria-hidden="true">📅</span> Schedule Test
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CASE-004</strong></td>
+                                    <td>
+                                        <span class="case-title">Pathology Review (Neuropathology)</span>
+                                        <small class="case-meta">Brain Tumor</small>
+                                    </td>
+                                    <td><span class="badge badge-priority-normal">🟢 Normal</span></td>
+                                    <td><span class="timeline-time">02:00 PM</span></td>
+                                    <td><span class="badge badge-status-scheduled">📅 Scheduled</span></td>
+                                    <td><button type="button" class="btn btn-secondary" disabled>Slot Confirmed</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- VIEW D: REPORTS PLACEHOLDER VIEW                          -->
+            <!-- ======================================================== -->
+            <div id="reportsView" class="view-container hidden">
+                <section class="welcome-banner">
+                    <div class="banner-text">
+                        <h2>Multidisciplinary Case Reports Registry</h2>
+                        <p>Generate, export, and review consolidated pathology, radiology, and genomic case summaries.</p>
+                    </div>
+                </section>
+                <div class="no-results" style="padding:3rem 1.5rem;">
+                    <p style="font-size:1.1rem; margin-bottom:0.5rem;">📑 <strong>Multidisciplinary Case Reports Registry</strong></p>
+                    <p style="color:var(--text-muted);">Consolidated reports generation is available for reviewed cases. Select a case from the dashboard to review evidence timelines.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 3. EVIDENCE DRILL-DOWN MODAL DIALOG                       -->
+    <!-- ======================================================== -->
+    <div id="evidenceDetailsModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="detailsModalTitle">
+        <div class="modal-card modal-card-large">
+            
+            <div class="modal-header">
+                <div>
+                    <span class="modal-subtitle">Evidence Audit & Lineage Details</span>
+                    <h3 id="detailsModalTitle">Evidence Details</h3>
+                </div>
+                <button type="button" id="closeDetailsHeaderBtn" class="btn-close" aria-label="Close Evidence Details Modal">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="audit-grid">
+                    <div class="audit-item">
+                        <span class="audit-label">Case ID:</span>
+                        <strong id="auditCaseId" class="audit-value">CASE-001</strong>
+                    </div>
+
+                    <div class="audit-item">
+                        <span class="audit-label">Evidence Type:</span>
+                        <span id="auditEvidenceType" class="audit-value">Pathology</span>
+                    </div>
+
+                    <div class="audit-item">
+                        <span class="audit-label">Test Name:</span>
+                        <strong id="auditTestName" class="audit-value">Biopsy</strong>
+                    </div>
+
+                    <div class="audit-item">
+                        <span class="audit-label">Specimen / Study ID:</span>
+                        <span id="auditSpecimenId" class="audit-value highlight-id">SP-001</span>
+                    </div>
+
+                    <div class="audit-item">
+                        <span class="audit-label">Collection Time:</span>
+                        <span id="auditCollectionTime" class="audit-value">08:30 AM</span>
+                    </div>
+
+                    <div class="audit-item">
+                        <span class="audit-label">Processing Time:</span>
+                        <span id="auditProcessingTime" class="audit-value">09:45 AM</span>
+                    </div>
+
+                    <div class="audit-item">
+                        <span class="audit-label">Reviewer:</span>
+                        <strong id="auditReviewer" class="audit-value">Dr. Kumar</strong>
+                    </div>
+
+                    <div class="audit-item">
+                        <span class="audit-label">Report Version:</span>
+                        <span id="auditReportVersion" class="badge badge-status-scheduled">v1.2</span>
+                    </div>
+
+                    <div class="audit-item">
+                        <span class="audit-label">Last Updated:</span>
+                        <span id="auditLastUpdated" class="audit-value">02:30 PM</span>
+                    </div>
+
+                    <div class="audit-item">
+                        <span class="audit-label">Source Department:</span>
+                        <span id="auditDepartment" class="audit-value">Pathology</span>
+                    </div>
+
+                    <div class="audit-item">
+                        <span class="audit-label">Freshness Status:</span>
+                        <div id="auditFreshnessSlot"></div>
+                    </div>
+                </div>
+
+                <div class="modal-details-box">
+                    <h4>Result Summary</h4>
+                    <p id="auditResultSummary">Abnormal tissue detected</p>
+                </div>
+
+                <div class="version-history-box">
+                    <h4>Report Version History</h4>
+                    <ul class="version-history-list" id="auditVersionHistoryList">
+                        <!-- Populated dynamically -->
+                    </ul>
+                </div>
+
+                <div class="modal-notice">
+                    <p>🛡️ <em>This panel presents factual specimen lineage and report audit records for multidisciplinary case review.</em></p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="closeDetailsFooterBtn" class="btn btn-secondary">
+                    <span aria-hidden="true">✕</span> Close Details
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Main JavaScript script file -->
+    <script src="script.js"></script>
+</body>
+</html>

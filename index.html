@@ -94,9 +94,21 @@
                     </a>
                 </li>
                 <li class="nav-item" id="navReportsItem">
-                    <a href="#reports" class="nav-link" id="navReportsLink">
-                        <span class="nav-icon" aria-hidden="true">📑</span>
-                        <span class="nav-text">Reports</span>
+                    <a href="#reports" class="nav-link" id="navReportsLink" aria-label="Failure Modes and Safety Testing">
+                        <span class="nav-icon" aria-hidden="true">🛡️</span>
+                        <span class="nav-text">Failure Modes</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="navExperimentItem">
+                    <a href="#experiment" class="nav-link" id="navExperimentLink" aria-label="Experiment and Performance Measurement">
+                        <span class="nav-icon" aria-hidden="true">📈</span>
+                        <span class="nav-text">Experiment</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="navValidationItem">
+                    <a href="#validation" class="nav-link" id="navValidationLink" aria-label="Final Validation and Project Readiness">
+                        <span class="nav-icon" aria-hidden="true">🎓</span>
+                        <span class="nav-text">Final Validation</span>
                     </a>
                 </li>
             </ul>
@@ -462,6 +474,11 @@
                                     <span class="team-badge">🧬 Molecular Specialist</span>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- MDT Safety Alert Box (Shown if Critical Evidence is Missing/Stale) -->
+                        <div id="mdtSafetyAlertBox" class="alert-box alert-stale hidden" style="margin-top: 1rem; margin-bottom: 1rem;" role="alert">
+                            <span id="mdtSafetyAlertMessage"></span>
                         </div>
 
                         <!-- Action Bar to Open Decision Form -->
@@ -852,19 +869,1530 @@
             </div>
 
             <!-- ======================================================== -->
-            <!-- VIEW D: REPORTS PLACEHOLDER VIEW                          -->
+            <!-- VIEW D: FAILURE MODES & SAFETY TESTING VIEW               -->
             <!-- ======================================================== -->
             <div id="reportsView" class="view-container hidden">
-                <section class="welcome-banner">
+                
+                <!-- 1. Header Banner -->
+                <section class="welcome-banner failure-modes-banner">
                     <div class="banner-text">
-                        <h2>Multidisciplinary Case Reports Registry</h2>
-                        <p>Generate, export, and review consolidated pathology, radiology, and genomic case summaries.</p>
+                        <h2>Failure Modes &amp; Safety Testing</h2>
+                        <p>These scenarios demonstrate how the system safely handles incomplete evidence, stale evidence, capacity limits, and other failures.</p>
                     </div>
                 </section>
-                <div class="no-results" style="padding:3rem 1.5rem;">
-                    <p style="font-size:1.1rem; margin-bottom:0.5rem;">📑 <strong>Multidisciplinary Case Reports Registry</strong></p>
-                    <p style="color:var(--text-muted);">Consolidated reports generation is available for reviewed cases. Select a case from the dashboard to review evidence timelines.</p>
-                </div>
+
+                <!-- 2. Safety Principle Information Box (Section 10) -->
+                <section class="safety-principle-section" aria-label="Clinical Safety Principles">
+                    <div class="safety-principle-card">
+                        <div class="safety-principle-header">
+                            <span class="safety-principle-icon" aria-hidden="true">🛡️</span>
+                            <div>
+                                <h3>Safety Principle</h3>
+                                <p class="safety-principle-sub">Foundational clinical decision boundaries and safe fallback mandate</p>
+                            </div>
+                        </div>
+                        <div class="safety-principle-body">
+                            <div class="principle-point">
+                                <span class="principle-bullet" aria-hidden="true">⚠️</span>
+                                <p><strong>The system does not make a medical diagnosis or treatment decision when important evidence is missing, stale, or unreliable.</strong></p>
+                            </div>
+                            <div class="principle-point">
+                                <span class="principle-bullet" aria-hidden="true">👨‍⚕️</span>
+                                <p><strong>When recommendations cannot be trusted, the system falls back to manual expert review.</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Interactive Test Controller Buttons (Section 8) -->
+                <section class="test-controls-section" aria-label="Interactive Test Controls">
+                    <div class="section-header">
+                        <div>
+                            <h3>Interactive Safety &amp; Edge Case Testing</h3>
+                            <p>Select any test scenario below to simulate failure modes, observe automated fallback mechanisms, and verify clinical safety rules.</p>
+                        </div>
+                        <button type="button" id="btnRunAllFailureTests" class="btn btn-secondary" aria-label="Run all safety failure test cases">
+                            <span aria-hidden="true">⚡</span> Run All Safety Tests
+                        </button>
+                    </div>
+
+                    <div class="test-button-grid" role="group" aria-label="Failure Mode Test Triggers">
+                        <button type="button" id="btnTestMissingEvidence" class="btn btn-test active" aria-label="Test Missing Evidence Scenario">
+                            <span class="btn-icon" aria-hidden="true">🔬</span>
+                            <span class="btn-title">Test Missing Evidence</span>
+                            <small class="btn-sub">CASE-001 (Molecular Missing)</small>
+                        </button>
+
+                        <button type="button" id="btnTestStaleEvidence" class="btn btn-test" aria-label="Test Stale Evidence Scenario">
+                            <span class="btn-icon" aria-hidden="true">⏳</span>
+                            <span class="btn-title">Test Stale Evidence</span>
+                            <small class="btn-sub">CASE-003 (Imaging Stale)</small>
+                        </button>
+
+                        <button type="button" id="btnTestCapacityFull" class="btn btn-test" aria-label="Test Capacity Full Scenario">
+                            <span class="btn-icon" aria-hidden="true">🏭</span>
+                            <span class="btn-title">Test Capacity Full</span>
+                            <small class="btn-sub">20/20 Daily Slots Exceeded</small>
+                        </button>
+
+                        <button type="button" id="btnTestIncompleteMdt" class="btn btn-test" aria-label="Test Incomplete MDT Review Scenario">
+                            <span class="btn-icon" aria-hidden="true">👨‍⚕️</span>
+                            <span class="btn-title">Test Incomplete MDT Review</span>
+                            <small class="btn-sub">CASE-001 Unsafe Approval Block</small>
+                        </button>
+
+                        <button type="button" id="btnTestSchedulingError" class="btn btn-test" aria-label="Test Scheduling Error Scenario">
+                            <span class="btn-icon" aria-hidden="true">⚠️</span>
+                            <span class="btn-title">Test Scheduling Error</span>
+                            <small class="btn-sub">Simulation of Dispatch Failure</small>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 4. Active Live Simulation Demonstration Card -->
+                <section class="live-simulation-section" aria-label="Active Simulation Demonstration">
+                    <div class="live-sim-card" id="liveSimCard">
+                        <div class="live-sim-header">
+                            <div>
+                                <span class="badge badge-status-scheduled" id="simScenarioBadge">Active Test Scenario</span>
+                                <h3 id="simScenarioTitle">Scenario 1: Missing Evidence</h3>
+                                <p id="simScenarioSub">Demonstration of safe fallback when required diagnostic panel is missing</p>
+                            </div>
+                            <div id="simStatusBadgeSlot">
+                                <span class="badge badge-pass" id="simStatusBadge">
+                                    <span aria-hidden="true">✅</span> PASS — Safe fallback triggered.
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Live Details Grid -->
+                        <div class="live-sim-details-grid">
+                            <div class="live-sim-detail">
+                                <span class="detail-label">Target Case / Resource:</span>
+                                <strong id="simTargetCase" class="detail-value">CASE-001</strong>
+                            </div>
+                            <div class="live-sim-detail">
+                                <span class="detail-label">Evidence / Condition:</span>
+                                <span id="simEvidenceCondition" class="detail-value">Molecular Evidence: Missing</span>
+                            </div>
+                            <div class="live-sim-detail">
+                                <span class="detail-label">Automated AI Decision:</span>
+                                <span id="simAiDecision" class="badge badge-status-missing">❌ Disabled (Unsafe)</span>
+                            </div>
+                        </div>
+
+                        <!-- Warning Message Box -->
+                        <div class="sim-warning-box" id="simWarningBox">
+                            <div class="sim-warning-header">
+                                <span class="warning-icon" id="simWarningIcon" aria-hidden="true">⚠</span>
+                                <strong id="simWarningTitle">Missing Evidence</strong>
+                            </div>
+                            <p class="sim-warning-message" id="simWarningMessage">Molecular evidence is not available.</p>
+                        </div>
+
+                        <!-- Expected System Response Box -->
+                        <div class="sim-response-box">
+                            <div class="sim-response-header">
+                                <span class="response-icon" aria-hidden="true">🛡️</span>
+                                <strong>System Response &amp; Safe Fallbacks:</strong>
+                            </div>
+                            <ul class="sim-response-list" id="simResponseList">
+                                <li><strong>Manual Expert Review Required.</strong></li>
+                                <li><strong>Request Additional Evidence.</strong></li>
+                                <li><em>Do not provide an automatic diagnosis or treatment recommendation.</em></li>
+                            </ul>
+                        </div>
+
+                        <!-- Interactive Action Simulator for this scenario -->
+                        <div class="sim-interactive-area" id="simInteractiveArea">
+                            <!-- Populated dynamically by script.js -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. Failure Mode Table (Section 7) -->
+                <section class="cases-section" aria-label="Failure Modes Summary Table">
+                    <div class="section-header">
+                        <div>
+                            <h3>Failure Mode Safety Table</h3>
+                            <p>Consolidated matrix of tested failure modes, expected responses, and safety audit status</p>
+                        </div>
+                        <span class="case-count-tag">5 Safety Invariants Monitored</span>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="cases-table failure-table" aria-label="Failure Scenarios and Expected Responses">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Failure Scenario</th>
+                                    <th scope="col">Expected System Response</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="table-scenario-cell">
+                                            <span class="table-scenario-icon" aria-hidden="true">🔬</span>
+                                            <div>
+                                                <strong>Missing Evidence</strong>
+                                                <small class="case-meta">CASE-001 (Molecular Missing)</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="system-response-badge">
+                                            <span aria-hidden="true">🛡️</span> Manual Expert Review Required
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-pass">
+                                            <span aria-hidden="true">✅</span> PASS
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="table-scenario-cell">
+                                            <span class="table-scenario-icon" aria-hidden="true">⏳</span>
+                                            <div>
+                                                <strong>Stale Evidence</strong>
+                                                <small class="case-meta">CASE-003 (Imaging Stale)</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="system-response-badge">
+                                            <span aria-hidden="true">🔄</span> Verify/refresh evidence
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-pass">
+                                            <span aria-hidden="true">✅</span> PASS
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="table-scenario-cell">
+                                            <span class="table-scenario-icon" aria-hidden="true">🏭</span>
+                                            <div>
+                                                <strong>Capacity Full</strong>
+                                                <small class="case-meta">20/20 Cases Scheduled</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="system-response-badge">
+                                            <span aria-hidden="true">🚫</span> No immediate scheduling
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-pass">
+                                            <span aria-hidden="true">✅</span> PASS
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="table-scenario-cell">
+                                            <span class="table-scenario-icon" aria-hidden="true">👨‍⚕️</span>
+                                            <div>
+                                                <strong>Incomplete MDT Evidence</strong>
+                                                <small class="case-meta">CASE-001 Approval Attempt</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="system-response-badge">
+                                            <span aria-hidden="true">🛑</span> Prevent unsafe approval
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-pass">
+                                            <span aria-hidden="true">✅</span> PASS
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <div class="table-scenario-cell">
+                                            <span class="table-scenario-icon" aria-hidden="true">⚠️</span>
+                                            <div>
+                                                <strong>Scheduling Error</strong>
+                                                <small class="case-meta">Simulated Laboratory Dispatch Glitch</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="system-response-badge">
+                                            <span aria-hidden="true">📋</span> Manual Scheduling Review Required
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-pass">
+                                            <span aria-hidden="true">✅</span> PASS
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 6. Detailed Scenarios Reference Grid (Sections 2, 3, 4, 5, 6) -->
+                <section class="scenario-cards-section" aria-label="Detailed Scenario Documentation">
+                    <div class="section-header">
+                        <div>
+                            <h3>Detailed Failure Scenarios &amp; Safe Fallback Specifications</h3>
+                            <p>Technical reference for clinical, operational, and scheduling safeguards</p>
+                        </div>
+                    </div>
+
+                    <div class="scenario-grid">
+                        <!-- Card 1 -->
+                        <div class="scenario-card" id="cardScenario1">
+                            <div class="scenario-card-header">
+                                <span class="case-id-badge">CASE-001</span>
+                                <h4>Case 1: Missing Evidence</h4>
+                            </div>
+                            <div class="scenario-card-body">
+                                <p class="scenario-condition"><strong>Molecular Evidence:</strong> Missing</p>
+                                <div class="alert-box alert-missing" style="margin: 0.5rem 0;">
+                                    <span aria-hidden="true">⚠</span> <strong>Missing Evidence:</strong> Molecular evidence is not available.
+                                </div>
+                                <div class="scenario-system-response">
+                                    <span class="label">System Response:</span>
+                                    <ul>
+                                        <li>"Manual Expert Review Required."</li>
+                                        <li>"Request Additional Evidence."</li>
+                                        <li><em>Do not provide an automatic diagnosis or treatment recommendation.</em></li>
+                                    </ul>
+                                </div>
+                                <div class="scenario-footer">
+                                    <span class="badge badge-pass">✅ PASS — Safe fallback triggered.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="scenario-card" id="cardScenario2">
+                            <div class="scenario-card-header">
+                                <span class="case-id-badge">CASE-003</span>
+                                <h4>Case 2: Stale Evidence</h4>
+                            </div>
+                            <div class="scenario-card-body">
+                                <p class="scenario-condition"><strong>Imaging Evidence:</strong> Stale</p>
+                                <div class="alert-box alert-stale" style="margin: 0.5rem 0;">
+                                    <span aria-hidden="true">⚠</span> <strong>Stale Evidence:</strong> The imaging evidence may no longer be current.
+                                </div>
+                                <div class="scenario-system-response">
+                                    <span class="label">System Response:</span>
+                                    <ul>
+                                        <li>"Manual Expert Review Required."</li>
+                                        <li>"Verify or refresh the evidence before final review."</li>
+                                    </ul>
+                                </div>
+                                <div class="scenario-footer">
+                                    <span class="badge badge-pass">✅ PASS — Stale evidence warning triggered.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="scenario-card" id="cardScenario3">
+                            <div class="scenario-card-header">
+                                <span class="badge badge-priority-urgent">CAPACITY LIMIT</span>
+                                <h4>Case 3: Capacity Full</h4>
+                            </div>
+                            <div class="scenario-card-body">
+                                <p class="scenario-condition"><strong>Daily Capacity:</strong> 20 | <strong>Scheduled:</strong> 20 | <strong>Available:</strong> 0</p>
+                                <div class="alert-box alert-stale" style="margin: 0.5rem 0;">
+                                    <span aria-hidden="true">⚠</span> <strong>CAPACITY FULL:</strong> No immediate slot is available.
+                                </div>
+                                <div class="scenario-system-response">
+                                    <span class="label">Suggested Action:</span>
+                                    <p style="margin-bottom:0.35rem;">"Schedule for the next available slot or request manual prioritization."</p>
+                                    <p><em>Do not schedule another test.</em></p>
+                                </div>
+                                <div class="scenario-footer">
+                                    <span class="badge badge-pass">✅ PASS — Capacity protection triggered.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4 -->
+                        <div class="scenario-card" id="cardScenario4">
+                            <div class="scenario-card-header">
+                                <span class="case-id-badge">CASE-001</span>
+                                <h4>Case 4: MDT Review with Incomplete Evidence</h4>
+                            </div>
+                            <div class="scenario-card-body">
+                                <p class="scenario-condition"><strong>Pathology:</strong> Fresh | <strong>Imaging:</strong> Fresh | <strong>Molecular:</strong> Missing</p>
+                                <p class="scenario-action-try"><strong>Attempted Action:</strong> "Case Ready for Clinical Review"</p>
+                                <div class="alert-box alert-stale" style="margin: 0.5rem 0;">
+                                    <span aria-hidden="true">⚠</span> <strong>Important evidence is missing.</strong> Manual Expert Review Required.
+                                </div>
+                                <div class="scenario-system-response">
+                                    <span class="label">Reviewer Choices Allowed:</span>
+                                    <ul>
+                                        <li>"Request Additional Evidence"</li>
+                                        <li>"Manual Expert Review Required"</li>
+                                        <li><em>Do not automatically approve the case.</em></li>
+                                    </ul>
+                                </div>
+                                <div class="scenario-footer">
+                                    <span class="badge badge-pass">✅ PASS — Unsafe decision prevented.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 5 -->
+                        <div class="scenario-card" id="cardScenario5">
+                            <div class="scenario-card-header">
+                                <span class="badge badge-priority-urgent">SCHEDULING GLITCH</span>
+                                <h4>Case 5: Scheduling Error</h4>
+                            </div>
+                            <div class="scenario-card-body">
+                                <p class="scenario-condition"><strong>Condition:</strong> Simulated automated dispatch / slot reservation failure</p>
+                                <div class="alert-box alert-stale" style="margin: 0.5rem 0;">
+                                    <span aria-hidden="true">⚠</span> <strong>Unable to complete scheduling.</strong>
+                                </div>
+                                <div class="scenario-system-response">
+                                    <span class="label">System Response:</span>
+                                    <p style="margin-bottom:0.35rem;">"Manual Scheduling Review Required."</p>
+                                    <p><em>Do not delete or modify existing case information.</em></p>
+                                </div>
+                                <div class="scenario-footer">
+                                    <span class="badge badge-pass">✅ PASS — Scheduling fallback triggered.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. Failure Test Log (Section 9) -->
+                <section class="cases-section" aria-label="Failure Mode Execution Log">
+                    <div class="section-header">
+                        <div>
+                            <h3>Failure Test Log</h3>
+                            <p>Chronological audit record of executed failure mode tests and fallback validation</p>
+                        </div>
+                        <button type="button" id="btnClearFailureLog" class="btn btn-secondary" aria-label="Clear Failure Log">
+                            <span aria-hidden="true">🗑️</span> Clear Log
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="cases-table log-table" aria-label="Executed Failure Mode Test Log">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Scenario</th>
+                                    <th scope="col">Time</th>
+                                    <th scope="col">System Response</th>
+                                    <th scope="col">Result</th>
+                                </tr>
+                            </thead>
+                            <tbody id="failureLogTableBody">
+                                <!-- Populated dynamically by script.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- VIEW E: EXPERIMENT & PERFORMANCE MEASUREMENT VIEW         -->
+            <!-- ======================================================== -->
+            <div id="experimentView" class="view-container hidden">
+
+                <!-- 1. Header Banner -->
+                <section class="welcome-banner experiment-banner">
+                    <div class="banner-text">
+                        <h2>Experiment &amp; Performance Measurement</h2>
+                        <p>This experiment measures the time required to assemble a complete multidisciplinary case-review timeline using the baseline workflow and the Pathology Evidence Timeline prototype.</p>
+                    </div>
+                </section>
+
+                <!-- 2. Primary Metric & Data Safety Information Cards -->
+                <section class="experiment-info-cards-grid" aria-label="Metric and Safety Overview">
+                    <!-- Card 1: Primary Metric -->
+                    <div class="card card-experiment-metric">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">🎯</span>
+                            <span class="card-label">Primary Metric</span>
+                        </div>
+                        <div class="card-body">
+                            <strong class="experiment-metric-title">Time to assemble a complete case-review timeline.</strong>
+                            <p class="experiment-metric-sub">Directly comparing manual evidence assembly against unified multidisciplinary timeline dashboard.</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Experiment Setup Summary -->
+                    <div class="card card-experiment-setup">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">⚙️</span>
+                            <span class="card-label">Experiment Setup</span>
+                        </div>
+                        <div class="card-body">
+                            <ul class="setup-spec-list">
+                                <li><strong>Experiment Name:</strong> Case Review Timeline Assembly Test</li>
+                                <li><strong>Primary Metric:</strong> Time to assemble a complete case-review timeline</li>
+                                <li><strong>Number of Test Cases:</strong> 5</li>
+                                <li><strong>Target Time:</strong> 5 minutes per case</li>
+                                <li><strong>Baseline:</strong> Manual evidence collection and timeline assembly</li>
+                                <li><strong>Prototype:</strong> Pathology Evidence Timeline application</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Data Safety & Fair Comparison Note -->
+                    <div class="card card-experiment-safety">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">🛡️</span>
+                            <span class="card-label">Fair Comparison &amp; Data Safety</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert-box alert-missing" style="margin: 0 0 0.75rem 0; padding: 0.6rem 0.8rem; font-size: 0.85rem;">
+                                <span>⚖️ <strong>Fair Comparison Mandate:</strong> Baseline and prototype measurements should use the same case and evidence requirements for a fair comparison.</span>
+                            </div>
+                            <p class="setup-safety-text" style="font-size: 0.85rem; color: var(--text-body); margin-bottom: 0.5rem;">
+                                <strong>Required Evidence Categories:</strong> Pathology, Imaging, Molecular, Specimen lineage, Review decision.
+                            </p>
+                            <p class="setup-safety-sub" style="font-size: 0.8rem; color: var(--text-muted);">
+                                🔒 <em>All experiment cases use de-identified/sample information. No real patient information is used.</em>
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Dual Timer Measurement Station (Baseline VS Prototype) -->
+                <section class="timers-station-section" aria-label="Workflow Timing Workstations">
+                    <div class="section-header">
+                        <div>
+                            <h3>Workflow Timing Workstation</h3>
+                            <p>Select a case and operate the stopwatch timers to measure real elapsed assembly time for both workflows.</p>
+                        </div>
+                        <div class="timer-case-sync">
+                            <label for="sharedTimerCaseSelect" class="form-label" style="margin:0; font-size:0.85rem;">Select Active Case:</label>
+                            <select id="sharedTimerCaseSelect" class="form-control" style="min-height:36px; padding:0.25rem 0.6rem; font-weight:600;">
+                                <option value="CASE-001" selected>CASE-001 (Suspected Lung Cancer)</option>
+                                <option value="CASE-002">CASE-002 (Breast Tumor)</option>
+                                <option value="CASE-003">CASE-003 (Liver Lesion)</option>
+                                <option value="CASE-004">CASE-004 (Brain Tumor)</option>
+                                <option value="CASE-005">CASE-005 (Lymphoma Surveillance)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="timers-dual-grid">
+                        
+                        <!-- Panel A: Baseline Workflow Timer -->
+                        <div class="timer-card card-baseline">
+                            <div class="timer-card-header">
+                                <div class="timer-title-group">
+                                    <span class="timer-icon" aria-hidden="true">📁</span>
+                                    <div>
+                                        <h4>Baseline Workflow Measurement</h4>
+                                        <small class="timer-sub">Manual evidence collection and timeline assembly</small>
+                                    </div>
+                                </div>
+                                <span class="badge badge-status-missing">Baseline (Manual)</span>
+                            </div>
+
+                            <p class="timer-explanation">
+                                The baseline represents the estimated/manual workflow where the reviewer collects pathology, imaging, molecular evidence, specimen information, and review information separately before assembling the timeline.
+                            </p>
+
+                            <div class="form-group" style="margin-bottom:0.75rem;">
+                                <label for="baselineCaseSelect" class="form-label">Case Selection:</label>
+                                <select id="baselineCaseSelect" class="form-control">
+                                    <option value="CASE-001">CASE-001</option>
+                                    <option value="CASE-002">CASE-002</option>
+                                    <option value="CASE-003">CASE-003</option>
+                                    <option value="CASE-004">CASE-004</option>
+                                    <option value="CASE-005">CASE-005</option>
+                                </select>
+                            </div>
+
+                            <div class="stopwatch-display-container">
+                                <span class="stopwatch-label">Baseline Time</span>
+                                <div class="stopwatch-display" id="baselineTimeDisplay" aria-live="polite">00:00</div>
+                                <span class="stopwatch-status" id="baselineTimerStatus">Timer Ready</span>
+                            </div>
+
+                            <div class="timer-controls-group">
+                                <button type="button" id="btnStartBaselineTimer" class="btn btn-primary btn-timer-start">
+                                    <span aria-hidden="true">▶</span> Start Baseline Timer
+                                </button>
+                                <button type="button" id="btnStopBaselineTimer" class="btn btn-secondary btn-timer-stop" disabled>
+                                    <span aria-hidden="true">⏹</span> Stop Baseline Timer
+                                </button>
+                                <button type="button" id="btnResetBaselineTimer" class="btn btn-secondary btn-timer-reset">
+                                    <span aria-hidden="true">↺</span> Reset Timer
+                                </button>
+                            </div>
+
+                            <div class="timer-save-bar">
+                                <button type="button" id="btnSaveBaselineResult" class="btn btn-secondary btn-save-time" disabled>
+                                    <span aria-hidden="true">💾</span> Save Baseline Result
+                                </button>
+                                <span id="baselineSavedFeedback" class="save-feedback-text hidden">✓ Saved</span>
+                            </div>
+                        </div>
+
+                        <!-- Panel B: Prototype Workflow Timer -->
+                        <div class="timer-card card-prototype">
+                            <div class="timer-card-header">
+                                <div class="timer-title-group">
+                                    <span class="timer-icon" aria-hidden="true">⚡</span>
+                                    <div>
+                                        <h4>Prototype Workflow Measurement</h4>
+                                        <small class="timer-sub">Pathology Evidence Timeline application</small>
+                                    </div>
+                                </div>
+                                <span class="badge badge-status-completed">Prototype (Unified)</span>
+                            </div>
+
+                            <p class="timer-explanation">
+                                Measure the time required to assemble and review the same case timeline using the Pathology Evidence Timeline prototype.
+                            </p>
+
+                            <div class="form-group" style="margin-bottom:0.75rem;">
+                                <label for="prototypeCaseSelect" class="form-label">Case Selection:</label>
+                                <select id="prototypeCaseSelect" class="form-control">
+                                    <option value="CASE-001">CASE-001</option>
+                                    <option value="CASE-002">CASE-002</option>
+                                    <option value="CASE-003">CASE-003</option>
+                                    <option value="CASE-004">CASE-004</option>
+                                    <option value="CASE-005">CASE-005</option>
+                                </select>
+                            </div>
+
+                            <div class="stopwatch-display-container">
+                                <span class="stopwatch-label">Prototype Time</span>
+                                <div class="stopwatch-display" id="prototypeTimeDisplay" aria-live="polite">00:00</div>
+                                <span class="stopwatch-status" id="prototypeTimerStatus">Timer Ready</span>
+                            </div>
+
+                            <div class="timer-controls-group">
+                                <button type="button" id="btnStartPrototypeTimer" class="btn btn-primary btn-timer-start">
+                                    <span aria-hidden="true">▶</span> Start Prototype Timer
+                                </button>
+                                <button type="button" id="btnStopPrototypeTimer" class="btn btn-secondary btn-timer-stop" disabled>
+                                    <span aria-hidden="true">⏹</span> Stop Prototype Timer
+                                </button>
+                                <button type="button" id="btnResetPrototypeTimer" class="btn btn-secondary btn-timer-reset">
+                                    <span aria-hidden="true">↺</span> Reset Timer
+                                </button>
+                            </div>
+
+                            <div class="timer-save-bar">
+                                <button type="button" id="btnSavePrototypeResult" class="btn btn-primary btn-save-time" disabled>
+                                    <span aria-hidden="true">💾</span> Save Prototype Result
+                                </button>
+                                <span id="prototypeSavedFeedback" class="save-feedback-text hidden">✓ Saved</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- 4. Experiment Results Table & Target Comparison -->
+                <section class="cases-section" aria-label="Comparative Experiment Results">
+                    <div class="section-header">
+                        <div>
+                            <h3>Experiment Results</h3>
+                            <p>Direct comparison of manual baseline assembly time vs. prototype dashboard assembly time</p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                            <button type="button" id="btnPrepareReport" class="btn btn-primary">
+                                <span aria-hidden="true">📑</span> Prepare Experiment Report
+                            </button>
+                            <button type="button" id="btnResetResults" class="btn btn-secondary">
+                                <span aria-hidden="true">↺</span> Reset to Sample Data
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="cases-table experiment-results-table" aria-label="Baseline vs Prototype Assembly Time Comparison">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Case</th>
+                                    <th scope="col">Baseline Time</th>
+                                    <th scope="col">Prototype Time</th>
+                                    <th scope="col">Time Saved</th>
+                                    <th scope="col">Improvement</th>
+                                    <th scope="col">Target Comparison (&le; 05:00)</th>
+                                    <th scope="col">Data Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="experimentResultsTableBody">
+                                <!-- Rendered dynamically by script.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 5. Experiment Summary KPI Cards -->
+                <section class="experiment-summary-section" aria-label="Experiment Summary Statistics">
+                    <div class="section-header">
+                        <div>
+                            <h3>Experiment Summary</h3>
+                            <p>Aggregated performance indicators derived from evaluated case assembly times</p>
+                        </div>
+                        <span id="experimentResultsCountTag" class="case-count-tag">Aggregating Results</span>
+                    </div>
+
+                    <!-- Warning banner if no actual results yet -->
+                    <div id="noActualResultsBanner" class="alert-box alert-aging hidden" style="margin-bottom:1rem;">
+                        <span aria-hidden="true">ℹ️</span>
+                        <span><strong>No experiment results recorded yet.</strong> Start and stop the stopwatch timers above and click "Save Result" to record real experimental measurements.</span>
+                    </div>
+
+                    <div class="dashboard-cards experiment-cards-grid" aria-label="Aggregated Experiment Metrics">
+                        <div class="card card-total">
+                            <div class="card-header">
+                                <span class="card-icon" aria-hidden="true">📁</span>
+                                <span class="card-label">Cases Tested</span>
+                            </div>
+                            <div class="card-body">
+                                <span class="card-value" id="summaryCasesTested">0</span>
+                                <span class="card-subtext" id="summaryCasesTestedSub">Active evaluated cases</span>
+                            </div>
+                        </div>
+
+                        <div class="card card-urgent">
+                            <div class="card-header">
+                                <span class="card-icon" aria-hidden="true">⏳</span>
+                                <span class="card-label">Average Baseline Time</span>
+                            </div>
+                            <div class="card-body">
+                                <span class="card-value" id="summaryAvgBaseline">00:00</span>
+                                <span class="card-subtext">Manual assembly workflow</span>
+                            </div>
+                        </div>
+
+                        <div class="card card-ready">
+                            <div class="card-header">
+                                <span class="card-icon" aria-hidden="true">⚡</span>
+                                <span class="card-label">Average Prototype Time</span>
+                            </div>
+                            <div class="card-body">
+                                <span class="card-value" id="summaryAvgPrototype">00:00</span>
+                                <span class="card-subtext">Unified timeline workflow</span>
+                            </div>
+                        </div>
+
+                        <div class="card card-total">
+                            <div class="card-header">
+                                <span class="card-icon" aria-hidden="true">⏱️</span>
+                                <span class="card-label">Average Time Saved</span>
+                            </div>
+                            <div class="card-body">
+                                <span class="card-value text-success" id="summaryAvgTimeSaved">00:00</span>
+                                <span class="card-subtext">Mean time reduction per case</span>
+                            </div>
+                        </div>
+
+                        <div class="card card-ready">
+                            <div class="card-header">
+                                <span class="card-icon" aria-hidden="true">📈</span>
+                                <span class="card-label">Average Improvement</span>
+                            </div>
+                            <div class="card-body">
+                                <span class="card-value text-success" id="summaryAvgImprovement">0.00%</span>
+                                <span class="card-subtext">Efficiency gain vs baseline</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. Target Performance Benchmark Card -->
+                <section class="target-performance-section" aria-label="Target Performance Benchmark">
+                    <div class="target-performance-card">
+                        <div class="target-header">
+                            <div class="target-title-group">
+                                <span class="target-icon" aria-hidden="true">🎯</span>
+                                <div>
+                                    <h4>Target Performance Benchmark</h4>
+                                    <p>Target: <strong>5 minutes (05:00)</strong> per complete case-review timeline assembly.</p>
+                                </div>
+                            </div>
+                            <div id="targetOverallStatusBadgeSlot">
+                                <span class="badge badge-target-achieved">
+                                    <span aria-hidden="true">✅</span> Target Achieved
+                                </span>
+                            </div>
+                        </div>
+                        <p class="target-subtext">
+                            Each measured prototype assembly time is evaluated against the 5-minute benchmark. Cases assembled in &le; 05:00 receive <strong>Target Achieved</strong> status, ensuring clinicians can conduct timely tumor board preparations without administrative bottlenecks.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 7. Error Analysis Section -->
+                <section class="cases-section" aria-label="Measurement Error Analysis">
+                    <div class="section-header">
+                        <div>
+                            <h3>Error Analysis</h3>
+                            <p>Identify operational, clinical, and human factors contributing to timeline assembly delays during measurement runs.</p>
+                        </div>
+                    </div>
+
+                    <div class="error-analysis-card">
+                        <form id="errorAnalysisForm" onsubmit="return false;">
+                            <div class="form-group">
+                                <label class="form-label">Select Contributing Delay Factors (Check all that apply):</label>
+                                <div class="error-checkbox-grid">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="errorFactor" value="Missing evidence">
+                                        <span>Missing evidence</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="errorFactor" value="Stale evidence">
+                                        <span>Stale evidence</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="errorFactor" value="Delayed test result">
+                                        <span>Delayed test result</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="errorFactor" value="Additional expert review required">
+                                        <span>Additional expert review required</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="errorFactor" value="Scheduling delay">
+                                        <span>Scheduling delay</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="errorFactor" value="User navigation delay">
+                                        <span>User navigation delay</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="errorFactor" value="Other">
+                                        <span>Other</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="txtErrorNotes" class="form-label">Additional Notes:</label>
+                                <textarea id="txtErrorNotes" class="form-control text-area" rows="3" placeholder="Provide qualitative context, specimen lineage gaps, or user friction notes..."></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" id="btnSaveErrorAnalysis" class="btn btn-primary">
+                                    <span aria-hidden="true">💾</span> Save Error Analysis
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Saved Error Logs Container -->
+                        <div class="saved-error-logs-container" style="margin-top:1.5rem;">
+                            <h4>Saved Error Analysis Records</h4>
+                            <div id="savedErrorLogsList" class="saved-error-logs-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 8. Experiment Methodology Section (Section 11) -->
+                <section class="methodology-section" aria-label="10-Step Experiment Methodology">
+                    <div class="methodology-card">
+                        <div class="methodology-header">
+                            <span class="methodology-icon" aria-hidden="true">📋</span>
+                            <div>
+                                <h3>Experiment Methodology</h3>
+                                <p>Standardized 10-step protocol for clinical workflow evaluation</p>
+                            </div>
+                        </div>
+                        <ol class="methodology-steps-list">
+                            <li><strong>Select a de-identified sample case:</strong> Choose from standardized de-identified registry cases (CASE-001 through CASE-005).</li>
+                            <li><strong>Identify the required evidence categories:</strong> Review required diagnostic domains (Pathology, Imaging, Molecular, Specimen Lineage, Review Decision).</li>
+                            <li><strong>Measure baseline timeline assembly time:</strong> Use the Baseline Stopwatch to measure the duration required to manually access disparate reports and draft the timeline.</li>
+                            <li><strong>Measure prototype timeline assembly time:</strong> Use the Prototype Stopwatch to measure the duration required to open and review the unified multidisciplinary timeline.</li>
+                            <li><strong>Compare both measurements:</strong> Directly contrast the elapsed duration of both approaches on the same case.</li>
+                            <li><strong>Calculate time saved:</strong> Compute the exact difference: <code>Time Saved = Baseline Time &minus; Prototype Time</code>.</li>
+                            <li><strong>Calculate percentage improvement:</strong> Compute efficiency gain: <code>Improvement % = ((Baseline &minus; Prototype) / Baseline) &times; 100</code>.</li>
+                            <li><strong>Record errors or delays:</strong> Use the Error Analysis form to log causes of friction (e.g. missing molecular panel or stale imaging).</li>
+                            <li><strong>Repeat for multiple cases:</strong> Execute the standardized measurement across all 5 test cases to ensure statistical validity.</li>
+                            <li><strong>Calculate average results:</strong> Aggregate the mean baseline duration, mean prototype duration, mean time reduction, and target compliance.</li>
+                        </ol>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- VIEW F: FINAL VALIDATION & PROJECT READINESS VIEW         -->
+            <!-- ======================================================== -->
+            <div id="validationView" class="view-container hidden">
+
+                <!-- 1. Header Banner -->
+                <section class="welcome-banner validation-banner">
+                    <div class="banner-text">
+                        <h2>Final Validation &amp; Project Readiness</h2>
+                        <p>This section summarizes the final validation of the Pathology Evidence Timeline prototype, including functionality, safety, experiment measurement, accessibility, and user feedback.</p>
+                    </div>
+                    <div class="banner-badge-group">
+                        <span class="badge badge-status-completed" style="font-size:0.85rem; padding: 0.5rem 0.9rem;">
+                            <span aria-hidden="true">🏁</span> Prototype Development Completed — Final Validation in Progress
+                        </span>
+                    </div>
+                </section>
+
+                <!-- 2. Phase Completion Checklist (Phases 1-10) -->
+                <section class="cases-section" aria-label="10-Phase Project Development Status">
+                    <div class="section-header">
+                        <div>
+                            <h3>Project Phase Completion Checklist</h3>
+                            <p>Sequential milestones completed across the engineering lifecycle of the unified multidisciplinary case review system.</p>
+                        </div>
+                        <span class="case-count-tag" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;">
+                            <span aria-hidden="true">📊</span> 9 of 10 Phases Completed
+                        </span>
+                    </div>
+
+                    <div class="phase-checklist-grid" role="list">
+                        
+                        <div class="phase-card phase-completed" role="listitem">
+                            <div class="phase-card-header">
+                                <span class="phase-num">Phase 1</span>
+                                <span class="badge badge-status-completed"><span aria-hidden="true">✅</span> COMPLETED</span>
+                            </div>
+                            <h4>Basic UI &amp; Project Structure</h4>
+                            <p>Semantic layout, responsive dashboard, CSS design system, accessible navigation structure.</p>
+                        </div>
+
+                        <div class="phase-card phase-completed" role="listitem">
+                            <div class="phase-card-header">
+                                <span class="phase-num">Phase 2</span>
+                                <span class="badge badge-status-completed"><span aria-hidden="true">✅</span> COMPLETED</span>
+                            </div>
+                            <h4>Case Data + Evidence Timeline</h4>
+                            <p>Multi-case registry (CASE-001–005), chronological timeline cards, metadata rendering.</p>
+                        </div>
+
+                        <div class="phase-card phase-completed" role="listitem">
+                            <div class="phase-card-header">
+                                <span class="phase-num">Phase 3</span>
+                                <span class="badge badge-status-completed"><span aria-hidden="true">✅</span> COMPLETED</span>
+                            </div>
+                            <h4>Evidence Freshness &amp; Missing States</h4>
+                            <p>Fresh/Aging/Stale indicators, turnaround thresholds, missing evidence warning badges.</p>
+                        </div>
+
+                        <div class="phase-card phase-completed" role="listitem">
+                            <div class="phase-card-header">
+                                <span class="phase-num">Phase 4</span>
+                                <span class="badge badge-status-completed"><span aria-hidden="true">✅</span> COMPLETED</span>
+                            </div>
+                            <h4>Role-Based Views</h4>
+                            <p>Domain perspectives (Doctor, Pathologist, Radiologist, Molecular Specialist, Lab Admin).</p>
+                        </div>
+
+                        <div class="phase-card phase-completed" role="listitem">
+                            <div class="phase-card-header">
+                                <span class="phase-num">Phase 5</span>
+                                <span class="badge badge-status-completed"><span aria-hidden="true">✅</span> COMPLETED</span>
+                            </div>
+                            <h4>Evidence Drill-down &amp; Specimen Lineage</h4>
+                            <p>Modal audit trail, specimen provenance chain (Biopsy &rarr; Tissue Block &rarr; H&amp;E &rarr; IHC).</p>
+                        </div>
+
+                        <div class="phase-card phase-completed" role="listitem">
+                            <div class="phase-card-header">
+                                <span class="phase-num">Phase 6</span>
+                                <span class="badge badge-status-completed"><span aria-hidden="true">✅</span> COMPLETED</span>
+                            </div>
+                            <h4>Capacity &amp; Scheduling</h4>
+                            <p>Lab workload slots (2/day limit), capacity-full protection, standard vs urgent booking.</p>
+                        </div>
+
+                        <div class="phase-card phase-completed" role="listitem">
+                            <div class="phase-card-header">
+                                <span class="phase-num">Phase 7</span>
+                                <span class="badge badge-status-completed"><span aria-hidden="true">✅</span> COMPLETED</span>
+                            </div>
+                            <h4>MDT Review &amp; Decision Tracking</h4>
+                            <p>Tumor board consensus, safety alert gating, clinical decision audit trail logging.</p>
+                        </div>
+
+                        <div class="phase-card phase-completed" role="listitem">
+                            <div class="phase-card-header">
+                                <span class="phase-num">Phase 8</span>
+                                <span class="badge badge-status-completed"><span aria-hidden="true">✅</span> COMPLETED</span>
+                            </div>
+                            <h4>Failure Modes &amp; Edge Cases</h4>
+                            <p>5 safety edge cases, fail-safe fallbacks, manual expert review escalation, safety log.</p>
+                        </div>
+
+                        <div class="phase-card phase-completed" role="listitem">
+                            <div class="phase-card-header">
+                                <span class="phase-num">Phase 9</span>
+                                <span class="badge badge-status-completed"><span aria-hidden="true">✅</span> COMPLETED</span>
+                            </div>
+                            <h4>Experiment &amp; Performance Measurement</h4>
+                            <p>Dual stopwatch workstation, time saved &amp; improvement calculations, 5-minute benchmark.</p>
+                        </div>
+
+                        <div class="phase-card phase-in-progress" role="listitem">
+                            <div class="phase-card-header">
+                                <span class="phase-num">Phase 10</span>
+                                <span class="badge badge-status-pending"><span aria-hidden="true">⏳</span> IN PROGRESS</span>
+                            </div>
+                            <h4>Final Validation &amp; Documentation</h4>
+                            <p>Functional, safety, failure, accessibility validation, tester feedback, final readiness.</p>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- 3. Validation Workstations: Functional, Safety, Failure, Accessibility -->
+                <section class="cases-section" aria-label="System Validation Suites">
+                    
+                    <!-- Tab-like or stacked validation checklists -->
+                    <div class="validation-container">
+
+                        <!-- A. Functional Validation Checklist -->
+                        <div class="validation-block card">
+                            <div class="validation-block-header">
+                                <div>
+                                    <div class="validation-tag-group">
+                                        <span class="card-icon" aria-hidden="true">⚙️</span>
+                                        <h4>Functional Validation</h4>
+                                    </div>
+                                    <p>Verify that all interactive capabilities operate as specified across the clinical review workflow.</p>
+                                </div>
+                                <div class="validation-actions">
+                                    <button type="button" id="btnMarkAllFunctionalPass" class="btn btn-secondary btn-sm">
+                                        <span aria-hidden="true">✅</span> Mark All PASS
+                                    </button>
+                                    <button type="button" id="btnResetFunctionalChecklist" class="btn btn-secondary btn-sm">
+                                        <span aria-hidden="true">↺</span> Reset
+                                    </button>
+                                </div>
+                            </div>
+
+                            <p class="validation-instruction-note">
+                                <span aria-hidden="true">ℹ️</span> <em>Select PASS or NEEDS REVIEW for each test. Do not claim a test passed unless verified.</em>
+                            </p>
+
+                            <div class="validation-items-list" id="functionalValidationList">
+                                <!-- Populated dynamically by script.js -->
+                            </div>
+                        </div>
+
+                        <!-- B. Safety Validation Checklist -->
+                        <div class="validation-block card" style="margin-top:1.5rem;">
+                            <div class="validation-block-header">
+                                <div>
+                                    <div class="validation-tag-group">
+                                        <span class="card-icon" aria-hidden="true">🛡️</span>
+                                        <h4>Safety Validation</h4>
+                                    </div>
+                                    <p>Verify strict clinical guardrails preventing automated overreach and ensuring manual expert fallbacks.</p>
+                                </div>
+                                <div class="validation-actions">
+                                    <button type="button" id="btnMarkAllSafetyPass" class="btn btn-secondary btn-sm">
+                                        <span aria-hidden="true">✅</span> Mark All PASS
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="validation-items-list" id="safetyValidationList">
+                                <!-- Populated dynamically by script.js -->
+                            </div>
+                        </div>
+
+                        <!-- C. Failure Mode Validation Checklist -->
+                        <div class="validation-block card" style="margin-top:1.5rem;">
+                            <div class="validation-block-header">
+                                <div>
+                                    <div class="validation-tag-group">
+                                        <span class="card-icon" aria-hidden="true">⚠️</span>
+                                        <h4>Failure Mode Validation</h4>
+                                    </div>
+                                    <p>Verify that the prototype safely handles incomplete evidence, capacity oversubscription, and transaction faults.</p>
+                                </div>
+                                <div class="validation-actions">
+                                    <button type="button" id="btnMarkAllFailurePass" class="btn btn-secondary btn-sm">
+                                        <span aria-hidden="true">✅</span> Mark All PASS
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="validation-items-list" id="failureValidationList">
+                                <!-- Populated dynamically by script.js -->
+                            </div>
+                        </div>
+
+                        <!-- D. Accessibility Validation Checklist -->
+                        <div class="validation-block card" style="margin-top:1.5rem;">
+                            <div class="validation-block-header">
+                                <div>
+                                    <div class="validation-tag-group">
+                                        <span class="card-icon" aria-hidden="true">♿</span>
+                                        <h4>Accessibility Validation</h4>
+                                    </div>
+                                    <p>Verify accessibility compliance, screen reader support, keyboard navigability, and clear visual cues.</p>
+                                </div>
+                                <div class="validation-actions">
+                                    <button type="button" id="btnMarkAllA11yPass" class="btn btn-secondary btn-sm">
+                                        <span aria-hidden="true">✅</span> Mark All PASS
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="validation-items-list" id="accessibilityValidationList">
+                                <!-- Populated dynamically by script.js -->
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- 4. Experiment Validation Section -->
+                <section class="cases-section" aria-label="Phase 9 Experiment Results Cross-Validation">
+                    <div class="section-header">
+                        <div>
+                            <h3>Experiment Validation</h3>
+                            <p>Cross-verification of measured timeline assembly durations against the primary evaluation metric</p>
+                        </div>
+                        <a href="#experiment" id="btnJumpToExperiment" class="btn btn-secondary btn-sm">
+                            <span aria-hidden="true">📈</span> Open Live Timing Station
+                        </a>
+                    </div>
+
+                    <div class="card card-experiment-summary-validation">
+                        <div class="experiment-val-metric-header">
+                            <span class="card-icon" aria-hidden="true">🎯</span>
+                            <div>
+                                <small style="text-transform:uppercase; font-size:0.75rem; letter-spacing:0.05em; color:var(--text-muted); font-weight:700;">Primary Metric</small>
+                                <h4 style="margin:0.2rem 0; font-size:1.1rem; color:var(--primary-navy);">Time to assemble a complete case-review timeline.</h4>
+                            </div>
+                        </div>
+
+                        <!-- Notice if no actual results measured yet -->
+                        <div id="valExpNoActualBanner" class="alert-box alert-aging" style="margin:1rem 0;">
+                            <span aria-hidden="true">ℹ️</span>
+                            <span><strong>No measured experiment results have been recorded yet.</strong> Initial figures below show sample benchmarks for UI testing. Do NOT claim an improvement percentage without actual measurements. Operate the stopwatch timers in Phase 9 to record verified experimental trials.</span>
+                        </div>
+
+                        <!-- Grid of dynamic experiment values -->
+                        <div class="dashboard-cards" style="margin-top:1rem;">
+                            <div class="card card-total">
+                                <div class="card-header">
+                                    <span class="card-icon" aria-hidden="true">📁</span>
+                                    <span class="card-label">Cases Tested</span>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-value" id="valExpCasesTested">0</span>
+                                    <span class="card-subtext" id="valExpCasesTestedSub">Actual measured trials</span>
+                                </div>
+                            </div>
+
+                            <div class="card card-urgent">
+                                <div class="card-header">
+                                    <span class="card-icon" aria-hidden="true">⏳</span>
+                                    <span class="card-label">Average Baseline Time</span>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-value" id="valExpAvgBaseline">00:00</span>
+                                    <span class="card-subtext">Manual assembly workflow</span>
+                                </div>
+                            </div>
+
+                            <div class="card card-ready">
+                                <div class="card-header">
+                                    <span class="card-icon" aria-hidden="true">⚡</span>
+                                    <span class="card-label">Average Prototype Time</span>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-value" id="valExpAvgPrototype">00:00</span>
+                                    <span class="card-subtext">Unified timeline workflow</span>
+                                </div>
+                            </div>
+
+                            <div class="card card-total">
+                                <div class="card-header">
+                                    <span class="card-icon" aria-hidden="true">⏱️</span>
+                                    <span class="card-label">Average Time Saved</span>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-value text-success" id="valExpAvgTimeSaved">00:00</span>
+                                    <span class="card-subtext">Net duration reduction</span>
+                                </div>
+                            </div>
+
+                            <div class="card card-ready">
+                                <div class="card-header">
+                                    <span class="card-icon" aria-hidden="true">📈</span>
+                                    <span class="card-label">Average Improvement</span>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-value text-success" id="valExpAvgImprovement">0.00%</span>
+                                    <span class="card-subtext">Efficiency gain vs baseline</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="target-performance-card" style="margin-top:1.25rem;">
+                            <div class="target-header">
+                                <div class="target-title-group">
+                                    <span class="target-icon" aria-hidden="true">🎯</span>
+                                    <div>
+                                        <h4>Target Time Benchmark: 5 minutes per case (05:00)</h4>
+                                        <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">Standard assembly threshold for rapid tumor board preparation.</p>
+                                    </div>
+                                </div>
+                                <div id="valExpTargetStatus">
+                                    <span class="badge badge-target-achieved"><span aria-hidden="true">✅</span> Target Achieved</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. User / Stakeholder Feedback & Feedback Summary -->
+                <section class="cases-section" aria-label="User Validation and Feedback Section">
+                    <div class="section-header">
+                        <div>
+                            <h3>User Validation &amp; Feedback</h3>
+                            <p>Collect structured feedback on prototype usability, timeline clarity, and safety warning effectiveness.</p>
+                        </div>
+                        <span id="userFeedbackCountTag" class="case-count-tag">0 Feedback Entries</span>
+                    </div>
+
+                    <div class="feedback-layout-grid">
+                        
+                        <!-- Panel A: User Feedback Submission Form -->
+                        <div class="card feedback-form-card">
+                            <h4>Record Tester Feedback</h4>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                                <em>Do not generate fake user feedback. Only display feedback entered by the user/tester.</em>
+                            </p>
+
+                            <form id="userFeedbackForm" onsubmit="return false;">
+                                
+                                <div class="form-group">
+                                    <label for="feedbackUserRole" class="form-label">User Role / Perspective:</label>
+                                    <select id="feedbackUserRole" class="form-control" required>
+                                        <option value="Doctor">Doctor</option>
+                                        <option value="Pathologist" selected>Pathologist</option>
+                                        <option value="Radiologist">Radiologist</option>
+                                        <option value="Molecular Specialist">Molecular Specialist</option>
+                                        <option value="Lab Admin">Lab Admin</option>
+                                        <option value="Student / Tester">Student / Tester</option>
+                                    </select>
+                                </div>
+
+                                <div class="likert-grid">
+                                    <div class="likert-group">
+                                        <label for="feedbackEaseRating" class="form-label">Ease of Use:</label>
+                                        <select id="feedbackEaseRating" class="form-control">
+                                            <option value="5">5 — Very Easy</option>
+                                            <option value="4" selected>4 — Easy</option>
+                                            <option value="3">3 — Neutral</option>
+                                            <option value="2">2 — Difficult</option>
+                                            <option value="1">1 — Very Difficult</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="likert-group">
+                                        <label for="feedbackClarityRating" class="form-label">Timeline Clarity:</label>
+                                        <select id="feedbackClarityRating" class="form-control">
+                                            <option value="5" selected>5 — Very Clear</option>
+                                            <option value="4">4 — Clear</option>
+                                            <option value="3">3 — Neutral</option>
+                                            <option value="2">2 — Unclear</option>
+                                            <option value="1">1 — Very Unclear</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="likert-group">
+                                        <label for="feedbackVisibilityRating" class="form-label">Evidence Visibility:</label>
+                                        <select id="feedbackVisibilityRating" class="form-control">
+                                            <option value="5">5 — Very Good</option>
+                                            <option value="4" selected>4 — Good</option>
+                                            <option value="3">3 — Neutral</option>
+                                            <option value="2">2 — Poor</option>
+                                            <option value="1">1 — Very Poor</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="likert-group">
+                                        <label for="feedbackSafetyRating" class="form-label">Safety Warnings:</label>
+                                        <select id="feedbackSafetyRating" class="form-control">
+                                            <option value="5" selected>5 — Very Clear</option>
+                                            <option value="4">4 — Clear</option>
+                                            <option value="3">3 — Neutral</option>
+                                            <option value="2">2 — Slightly Clear</option>
+                                            <option value="1">1 — Not Clear</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="margin-top:1rem;">
+                                    <label for="txtUsefulFeedback" class="form-label">What did you find useful?</label>
+                                    <textarea id="txtUsefulFeedback" class="form-control text-area" rows="2" placeholder="e.g. Unified timeline view saved substantial navigation time across systems..."></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="txtImprovementFeedback" class="form-label">What could be improved?</label>
+                                    <textarea id="txtImprovementFeedback" class="form-control text-area" rows="2" placeholder="e.g. Add DICOM slice viewer integration, automated notifications for stale tests..."></textarea>
+                                </div>
+
+                                <div class="form-actions" style="margin-top:1rem;">
+                                    <button type="button" id="btnSaveUserFeedback" class="btn btn-primary">
+                                        <span aria-hidden="true">💾</span> Save Feedback
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Panel B: Feedback Summary & Saved Records -->
+                        <div class="feedback-summary-container">
+                            
+                            <div class="card feedback-kpis-card">
+                                <h4>Feedback Summary</h4>
+                                
+                                <div id="noFeedbackBanner" class="alert-box alert-aging" style="margin-top:0.75rem;">
+                                    <span aria-hidden="true">ℹ️</span>
+                                    <span><strong>No user feedback recorded yet.</strong> Submit the feedback form to record tester insights and calculate satisfaction averages.</span>
+                                </div>
+
+                                <div class="feedback-metrics-grid" id="feedbackMetricsGrid">
+                                    <div class="feedback-metric-item">
+                                        <span class="f-metric-label">Total Entries</span>
+                                        <strong class="f-metric-val" id="valFeedbackTotal">0</strong>
+                                    </div>
+                                    <div class="feedback-metric-item">
+                                        <span class="f-metric-label">Avg Ease of Use</span>
+                                        <strong class="f-metric-val" id="valAvgEase">N/A</strong>
+                                    </div>
+                                    <div class="feedback-metric-item">
+                                        <span class="f-metric-label">Avg Timeline Clarity</span>
+                                        <strong class="f-metric-val" id="valAvgClarity">N/A</strong>
+                                    </div>
+                                    <div class="feedback-metric-item">
+                                        <span class="f-metric-label">Avg Evidence Visibility</span>
+                                        <strong class="f-metric-val" id="valAvgVisibility">N/A</strong>
+                                    </div>
+                                    <div class="feedback-metric-item">
+                                        <span class="f-metric-label">Avg Warning Clarity</span>
+                                        <strong class="f-metric-val" id="valAvgSafety">N/A</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="saved-feedback-feed" style="margin-top:1.25rem;">
+                                <h4>Saved Feedback Records</h4>
+                                <div id="savedFeedbackContainer" class="saved-feedback-list">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- 6. Final Safety Statement -->
+                <section class="cases-section" aria-label="Final System Safety Principle">
+                    <div class="card final-safety-card">
+                        <div class="final-safety-header">
+                            <span class="final-safety-icon" aria-hidden="true">🛡️</span>
+                            <div>
+                                <h3 style="color:#991b1b; margin:0 0 0.3rem 0;">Final Safety Principle</h3>
+                                <p style="margin:0; font-size:0.9rem; color:#7f1d1d;">Foundational clinical and ethical responsibility guideline</p>
+                            </div>
+                        </div>
+                        <div class="final-safety-body">
+                            <p class="final-safety-statement">
+                                &ldquo;This prototype is designed to organize and present multidisciplinary evidence. It does not replace qualified clinical professionals.&rdquo;
+                            </p>
+                            <p class="final-safety-statement">
+                                &ldquo;When important evidence is missing, stale, unreliable, or unavailable, the system provides warnings and directs the user toward manual expert review.&rdquo;
+                            </p>
+                            <p class="final-safety-statement">
+                                &ldquo;Clinical diagnosis and treatment decisions remain the responsibility of qualified professionals.&rdquo;
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. Project Limitations & Future Enhancements -->
+                <section class="cases-section" aria-label="Limitations and Future Roadmap">
+                    <div class="limitations-roadmap-grid">
+                        
+                        <!-- Limitations Card -->
+                        <div class="card card-limitations">
+                            <div class="card-header">
+                                <span class="card-icon" aria-hidden="true">⚠️</span>
+                                <div>
+                                    <h4>Current Limitations</h4>
+                                    <small style="color:var(--text-muted);">Transparent educational boundaries of the prototype</small>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <ul class="spec-bullet-list">
+                                    <li>Uses de-identified/sample data.</li>
+                                    <li>No real patient data is used.</li>
+                                    <li>No real clinical diagnosis is generated.</li>
+                                    <li>No real hospital/laboratory backend is connected.</li>
+                                    <li>No real authentication system is implemented.</li>
+                                    <li>Scheduling is simulated for prototype demonstration.</li>
+                                    <li>Experiment results depend on the recorded test measurements.</li>
+                                    <li>User feedback depends on actual tester input.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Future Enhancements Card -->
+                        <div class="card card-roadmap">
+                            <div class="card-header">
+                                <span class="card-icon" aria-hidden="true">🚀</span>
+                                <div>
+                                    <h4>Future Enhancements</h4>
+                                    <small style="color:var(--text-muted);">Anticipated clinical IT architecture roadmap</small>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <ul class="spec-bullet-list">
+                                    <li>Secure database integration.</li>
+                                    <li>Real authentication and role-based access control.</li>
+                                    <li>Integration with laboratory information systems.</li>
+                                    <li>Integration with imaging systems.</li>
+                                    <li>Real-time molecular result updates.</li>
+                                    <li>Secure audit logging.</li>
+                                    <li>Hospital scheduling integration.</li>
+                                    <li>Larger-scale usability testing.</li>
+                                    <li>More extensive performance evaluation.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- 8. Project Summary & Demonstration Sequence -->
+                <section class="cases-section" aria-label="Comprehensive Project Summary">
+                    <div class="project-summary-card card">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">📋</span>
+                            <div>
+                                <h3>Project Summary</h3>
+                                <small style="color:var(--text-muted);">Core architectural essence of the multidisciplinary pathology evidence system</small>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="summary-columns-grid">
+                                <div class="summary-col">
+                                    <strong>Problem:</strong>
+                                    <p>Difficulty assembling multidisciplinary pathology, imaging, molecular, specimen, and review evidence into one reliable timeline.</p>
+                                </div>
+                                <div class="summary-col">
+                                    <strong>Solution:</strong>
+                                    <p>A web-based evidence timeline prototype that organizes multidisciplinary case information and provides freshness indicators, role-based views, specimen lineage, scheduling, MDT review, failure handling, and experiment measurement.</p>
+                                </div>
+                                <div class="summary-col">
+                                    <strong>Technology:</strong>
+                                    <p>HTML5 + CSS3 + Vanilla JavaScript + Git/GitHub (Zero external framework dependencies).</p>
+                                </div>
+                                <div class="summary-col">
+                                    <strong>Safety:</strong>
+                                    <p>Missing/stale/unreliable evidence triggers warnings and manual expert-review fallback.</p>
+                                </div>
+                                <div class="summary-col">
+                                    <strong>Evaluation:</strong>
+                                    <p>Failure-mode testing and timeline-assembly time measurement are included.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 9. Final Demonstration Checklist (18 Steps) -->
+                <section class="cases-section" aria-label="18-Step Live Demonstration Checklist">
+                    <div class="card demo-checklist-card">
+                        <div class="card-header">
+                            <span class="card-icon" aria-hidden="true">🎬</span>
+                            <div>
+                                <h3>Final Demonstration Checklist</h3>
+                                <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">Standardized 18-step walk-through sequence for clinical stakeholder reviews and oral defenses</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ol class="demo-steps-list">
+                                <li><strong>Open Dashboard:</strong> Verify patient registry, quick case navigation, freshness stat counters, and capacity indicators.</li>
+                                <li><strong>Select a case:</strong> Click "View Details" on CASE-001 or CASE-002 from the case directory.</li>
+                                <li><strong>Open Evidence Timeline:</strong> Inspect chronological arrangement of diagnostic evidence cards.</li>
+                                <li><strong>Show Fresh/Missing/Stale evidence:</strong> Identify distinct badges (Fresh &le;48h, Aging &le;7d, Stale &gt;7d, Missing).</li>
+                                <li><strong>Open Evidence Details:</strong> Click "View Details" to open audit drill-down modal with collection time and reviewer info.</li>
+                                <li><strong>Show Specimen Lineage:</strong> Inspect visual specimen derivation chain (S-2026-001 &rarr; Tissue Block &rarr; H&amp;E &rarr; EGFR).</li>
+                                <li><strong>Change User Role:</strong> Use perspective switcher (Pathologist, Radiologist, Molecular, Lab Admin, Doctor) to observe role-tailored priority ordering.</li>
+                                <li><strong>Open Scheduling:</strong> Navigate to scheduling workstation to view daily specimen processing quotas.</li>
+                                <li><strong>Demonstrate capacity handling:</strong> Attempt over-scheduling; observe full-capacity lock and emergency urgent slot allocation.</li>
+                                <li><strong>Open MDT Review:</strong> Inspect multidisciplinary consensus tracking section and evidence completeness status.</li>
+                                <li><strong>Record/view MDT decision:</strong> Log consensus clinical recommendation and observe persistent append-only audit trail.</li>
+                                <li><strong>Open Failure Modes:</strong> Navigate to Failure Modes &amp; Safety Testing workspace.</li>
+                                <li><strong>Run five failure tests:</strong> Execute simulations for missing molecular evidence, stale imaging, capacity limit, incomplete MDT consensus, and scheduling fault.</li>
+                                <li><strong>Open Experiment:</strong> Navigate to Experiment &amp; Performance Measurement view.</li>
+                                <li><strong>Show baseline/prototype measurement:</strong> Operate dual stopwatch timers comparing manual timeline assembly with unified prototype dashboard.</li>
+                                <li><strong>Show experiment result:</strong> Observe dynamic calculation of Time Saved, Improvement %, and 5-minute target benchmark comparison.</li>
+                                <li><strong>Open Final Validation:</strong> Navigate to Final Validation &amp; Project Readiness view.</li>
+                                <li><strong>Show validation and feedback sections:</strong> Review completed phases, toggle checklist verifications, and inspect recorded tester feedback.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 10. Final Project Development Status -->
+                <section class="cases-section" aria-label="Final Project Engineering Status">
+                    <div class="final-status-footer-card">
+                        <div class="final-status-header">
+                            <span class="final-status-badge">
+                                <span aria-hidden="true">🏆</span> Project Development Status
+                            </span>
+                            <h3 style="margin:0.5rem 0 0.25rem 0;">Prototype Development Completed — Final Validation in Progress</h3>
+                            <p style="margin:0; font-size:0.9rem; color:var(--text-muted);">
+                                🔒 <em>Do NOT claim clinical deployment or real-world production readiness. This application is an educational prototype and research demonstration.</em>
+                            </p>
+                        </div>
+
+                        <div class="phase-pipeline-strip" aria-label="10-Phase Pipeline Status">
+                            <span class="pipe-node completed"><span aria-hidden="true">✅</span> Phase 1</span>
+                            <span class="pipe-arrow">&rarr;</span>
+                            <span class="pipe-node completed"><span aria-hidden="true">✅</span> Phase 2</span>
+                            <span class="pipe-arrow">&rarr;</span>
+                            <span class="pipe-node completed"><span aria-hidden="true">✅</span> Phase 3</span>
+                            <span class="pipe-arrow">&rarr;</span>
+                            <span class="pipe-node completed"><span aria-hidden="true">✅</span> Phase 4</span>
+                            <span class="pipe-arrow">&rarr;</span>
+                            <span class="pipe-node completed"><span aria-hidden="true">✅</span> Phase 5</span>
+                            <span class="pipe-arrow">&rarr;</span>
+                            <span class="pipe-node completed"><span aria-hidden="true">✅</span> Phase 6</span>
+                            <span class="pipe-arrow">&rarr;</span>
+                            <span class="pipe-node completed"><span aria-hidden="true">✅</span> Phase 7</span>
+                            <span class="pipe-arrow">&rarr;</span>
+                            <span class="pipe-node completed"><span aria-hidden="true">✅</span> Phase 8</span>
+                            <span class="pipe-arrow">&rarr;</span>
+                            <span class="pipe-node completed"><span aria-hidden="true">✅</span> Phase 9</span>
+                            <span class="pipe-arrow">&rarr;</span>
+                            <span class="pipe-node in-progress"><span aria-hidden="true">⏳</span> Phase 10 (FINAL)</span>
+                        </div>
+                    </div>
+                </section>
+
             </div>
 
         </main>
@@ -962,6 +2490,36 @@
             <div class="modal-footer">
                 <button type="button" id="closeDetailsFooterBtn" class="btn btn-secondary">
                     <span aria-hidden="true">✕</span> Close Details
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 4. EXPERIMENT REPORT MODAL DIALOG                         -->
+    <!-- ======================================================== -->
+    <div id="experimentReportModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
+        <div class="modal-card modal-card-large">
+            
+            <div class="modal-header">
+                <div>
+                    <span class="modal-subtitle">Performance Evaluation Summary</span>
+                    <h3 id="reportModalTitle">Case Review Timeline Assembly Report</h3>
+                </div>
+                <button type="button" id="closeReportHeaderBtn" class="btn-close" aria-label="Close Report Modal">&times;</button>
+            </div>
+
+            <div class="modal-body" id="experimentReportContent">
+                <!-- Populated dynamically by script.js -->
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btnPrintReportBtn" class="btn btn-primary">
+                    <span aria-hidden="true">🖨️</span> Print / Export Report
+                </button>
+                <button type="button" id="closeReportFooterBtn" class="btn btn-secondary">
+                    <span aria-hidden="true">✕</span> Close Report
                 </button>
             </div>
 
